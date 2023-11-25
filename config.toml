@@ -1,13 +1,14 @@
 # The URL the site will be built for
 base_url = "https://kirovj.github.io"
+theme = "Seje2"
+default_language = "zh-tw"
+generate_feed = true
 
 # Whether to automatically compile all Sass files in the sass directory
 compile_sass = true
 
 # Whether to build a search index to be used later on by a JavaScript library
-build_search_index = true
-
-theme = "anemone"
+build_search_index = false
 
 [markdown]
 # Whether to do syntax highlighting
@@ -16,3 +17,24 @@ highlight_code = true
 
 [extra]
 # Put all your custom variables here
+seje_menu_links = [
+    { url = "$BASE_URL", name = "home" },
+    { url = "$BASE_URL/archives", name = "archives" },
+    { url = "$BASE_URL/about", name = "about" },
+    { url = "$BASE_URL/atom.xml", name = "rss" },
+]
+
+[languages.zh-tw]
+title = "Kirovj's Chaos"
+
+[languages.zh-tw.translations]
+title = "Kirovj's Chaos"
+home = "主頁"
+archives = "歸檔"
+about = "關於"
+rss = "訂閱"
+more = "查看全文"
+olderArticle = "舊文"
+newer = "上一篇"
+older = "下一篇"
+loading = "加載中..."
