@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Java简单实现python itertools.groupby &middot; Kirovj&#x27;s Chaos</title>
+    <meta name="description" content="" />
+    <link rel="shortcut icon"  href="https://kirovj.github.io/favicon.ico" />
+    <link rel="alternate" type="application/atom+xml" title="RSS" href="https://kirovj.github.io/atom.xml">
+
+    <style>html,body{background:#fffaf7;color:#2d2d2d;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"}a,a:visited{color:darkred;text-decoration:none}a:hover{text-decoration:underline}main{margin:auto;max-width:38rem;padding:.8rem}pre{background:#fff;overflow:scroll;padding:1rem}td{border:1px solid #2d2d2d;padding:10px}img{height:auto;max-width:100%}.homepage-list{list-style:none;padding:1rem 0}.homepage-list li{align-items:center;display:flex;flex-wrap:wrap;justify-content:space-between;margin-bottom:10px}@media (max-width: 38rem){.homepage-list li a{width:100%}}</style>
+
+    <meta property="og:site_name" content="Kirovj&#x27;s Chaos">
+      <meta name="author" content="Kirovj" />
+      <meta property="og:title" content="Java简单实现python itertools.groupby">
+      <meta property="og:description" content="">
+      <meta property="og:url" content="https://kirovj.github.io/012-javajian-dan-shi-xian-python-itertools-groupby/">
+      <meta property="og:image" content="">
+
+      <meta property="og:type" content="article" />
+        <meta property="article:published_time" content="2021-07-13T00:00:00+00:00" />
+
+      
+      
+    
+
+  </head>
+  
+
+  <body>
+    <main id="main" role="main">
+
+      
+      <header role="banner">
+        <h3 style="margin-top:0;">
+          <a href="https://kirovj.github.io" title="Home">Kirovj&#x27;s Chaos</a>
+          <br /><small></small>
+        </h3>
+      </header>
+      <hr />
+      
+
+      
+<article>
+  <h1>Java简单实现python itertools.groupby</h1>
+
+  
+    <p style="font-size:90%;">Posted on <time datetime="2021-07-13T00:00:00+00:00">July 13, 2021</time></p>
+  
+
+  <pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">class </span><span style="color:#ebcb8b;">groupby</span><span style="color:#eff1f5;">(</span><span style="color:#a3be8c;">object</span><span style="color:#eff1f5;">):
+</span><span>    </span><span style="color:#65737e;">&quot;&quot;&quot;
+</span><span style="color:#65737e;">    make an iterator that returns consecutive keys and groups from the iterable
+</span><span style="color:#65737e;">    
+</span><span style="color:#65737e;">      iterable
+</span><span style="color:#65737e;">        Elements to divide into groups according to the key function.
+</span><span style="color:#65737e;">      key
+</span><span style="color:#65737e;">        A function for computing the group category for each element.
+</span><span style="color:#65737e;">        If the key function is not specified or is None, the element itself
+</span><span style="color:#65737e;">        is used for grouping.
+</span><span style="color:#65737e;">    &quot;&quot;&quot;
+</span></code></pre>
+<h3 id="python-usage"><em>python usage:</em></h3>
+<pre data-lang="python" style="background-color:#2b303b;color:#c0c5ce;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#b48ead;">from </span><span>itertools </span><span style="color:#b48ead;">import </span><span>groupby
+</span><span>
+</span><span>data = [(</span><span style="color:#d08770;">False</span><span>, </span><span style="color:#d08770;">1</span><span>), (</span><span style="color:#d08770;">False</span><span>, </span><span style="color:#d08770;">5</span><span>), (</span><span style="color:#d08770;">True</span><span>, </span><span style="color:#d08770;">3</span><span>), (</span><span style="color:#d08770;">True</span><span>, </span><span style="color:#d08770;">1</span><span>), (</span><span style="color:#d08770;">False</span><span>, </span><span style="color:#d08770;">1</span><span>), ]
+</span><span>
+</span><span style="color:#b48ead;">for </span><span>tag, d </span><span style="color:#b48ead;">in </span><span style="color:#bf616a;">groupby</span><span>(data, </span><span style="color:#bf616a;">key</span><span>=</span><span style="color:#b48ead;">lambda </span><span style="color:#bf616a;">x</span><span>: x[</span><span style="color:#d08770;">0</span><span>]):
+</span><span>    </span><span style="color:#96b5b4;">print</span><span>(tag, </span><span style="color:#bf616a;">list</span><span>(d))
+</span></code></pre>
+<p>False [(False, 1), (False, 5)]<br />
+True  [(True, 3), (True, 1)]<br />
+False [(False, 1)]</p>
+<blockquote>
+<p>简单来说， 就是给一个列表，按照该列表元素的某个特征进行分组但是并不聚合</p>
+</blockquote>
+<hr />
+<h3 id="javashi-xian"><em>Java实现</em></h3>
+<p>首先，定义一个类表示组</p>
+<pre data-lang="java" style="background-color:#2b303b;color:#c0c5ce;" class="language-java "><code class="language-java" data-lang="java"><span style="color:#b48ead;">public static class </span><span style="color:#ebcb8b;">Group</span><span style="color:#eff1f5;">&lt;</span><span style="color:#bf616a;">T</span><span style="color:#eff1f5;">, </span><span style="color:#bf616a;">E</span><span style="color:#eff1f5;">&gt; {
+</span><span style="color:#eff1f5;">    </span><span style="color:#65737e;">// 元素的分组特征
+</span><span style="color:#eff1f5;">	</span><span style="color:#b48ead;">final </span><span style="color:#ebcb8b;">T </span><span style="color:#eff1f5;">type;
+</span><span style="color:#eff1f5;">    </span><span style="color:#65737e;">// 要分组的 List
+</span><span style="color:#eff1f5;">	</span><span style="color:#ebcb8b;">List</span><span style="color:#eff1f5;">&lt;</span><span style="color:#ebcb8b;">E</span><span style="color:#eff1f5;">&gt; data;
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">	</span><span style="color:#b48ead;">public </span><span style="color:#8fa1b3;">Group</span><span style="color:#eff1f5;">(</span><span style="color:#ebcb8b;">T </span><span style="color:#bf616a;">type</span><span style="color:#eff1f5;">) {
+</span><span style="color:#eff1f5;">		</span><span style="color:#bf616a;">this</span><span style="color:#eff1f5;">.type </span><span>=</span><span style="color:#eff1f5;"> type;
+</span><span style="color:#eff1f5;">        </span><span style="color:#bf616a;">this</span><span style="color:#eff1f5;">.data </span><span>= </span><span style="color:#b48ead;">new </span><span style="color:#ebcb8b;">ArrayList</span><span style="color:#eff1f5;">();
+</span><span style="color:#eff1f5;">	}
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">	</span><span style="color:#b48ead;">public </span><span style="color:#ebcb8b;">T </span><span style="color:#8fa1b3;">type</span><span style="color:#eff1f5;">() {
+</span><span style="color:#eff1f5;">		</span><span style="color:#b48ead;">return</span><span style="color:#eff1f5;"> type;
+</span><span style="color:#eff1f5;">	}
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">	</span><span style="color:#b48ead;">public </span><span style="color:#ebcb8b;">List</span><span style="color:#eff1f5;">&lt;</span><span style="color:#ebcb8b;">E</span><span style="color:#eff1f5;">&gt; </span><span style="color:#8fa1b3;">data</span><span style="color:#eff1f5;">() {
+</span><span style="color:#eff1f5;">		</span><span style="color:#b48ead;">return</span><span style="color:#eff1f5;"> data;
+</span><span style="color:#eff1f5;">	}
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">	</span><span style="color:#b48ead;">public void </span><span style="color:#8fa1b3;">add</span><span style="color:#eff1f5;">(</span><span style="color:#ebcb8b;">E </span><span style="color:#bf616a;">e</span><span style="color:#eff1f5;">) {
+</span><span style="color:#eff1f5;">		</span><span style="color:#bf616a;">this</span><span style="color:#eff1f5;">.data.</span><span style="color:#bf616a;">add</span><span style="color:#eff1f5;">(e);
+</span><span style="color:#eff1f5;">	}
+</span><span style="color:#eff1f5;">}
+</span></code></pre>
+<p>定义一个接口，包含两个方法：</p>
+<ol>
+<li>通过一个元素获取它的特征</li>
+<li>比较两个特征是否一致</li>
+</ol>
+<pre data-lang="java" style="background-color:#2b303b;color:#c0c5ce;" class="language-java "><code class="language-java" data-lang="java"><span style="color:#b48ead;">public interface </span><span style="color:#ebcb8b;">TypeDeal</span><span style="color:#eff1f5;">&lt;</span><span style="color:#bf616a;">T</span><span style="color:#eff1f5;">, </span><span style="color:#bf616a;">E</span><span style="color:#eff1f5;">&gt; {
+</span><span style="color:#eff1f5;">    </span><span style="color:#65737e;">/**
+</span><span style="color:#65737e;">     * 比较两个特征是否一致
+</span><span style="color:#65737e;">     *
+</span><span style="color:#65737e;">     * </span><span style="color:#b48ead;">@param </span><span style="color:#bf616a;">t1</span><span style="color:#65737e;"> last T
+</span><span style="color:#65737e;">     * </span><span style="color:#b48ead;">@param </span><span style="color:#bf616a;">t2</span><span style="color:#65737e;"> next T
+</span><span style="color:#65737e;">     * </span><span style="color:#b48ead;">@param </span><span style="color:#bf616a;">e</span><span style="color:#65737e;"> next E
+</span><span style="color:#65737e;">     * </span><span style="color:#b48ead;">@return</span><span style="color:#65737e;"> if e the same type
+</span><span style="color:#65737e;">     */
+</span><span style="color:#65737e;">    default boolean check(T t1, T t2, E e) {
+</span><span style="color:#65737e;">        return t1.equals(t2);
+</span><span style="color:#65737e;">    }
+</span><span style="color:#65737e;">
+</span><span style="color:#65737e;">    /**
+</span><span style="color:#65737e;">     * 通过一个元素获取它的特征
+</span><span style="color:#65737e;">     * </span><span style="color:#b48ead;">@param </span><span style="color:#bf616a;">e</span><span style="color:#65737e;"> item
+</span><span style="color:#65737e;">     * </span><span style="color:#b48ead;">@return</span><span style="color:#65737e;"> item&#39;s type
+</span><span style="color:#65737e;">     */
+</span><span style="color:#65737e;">    T make(E e);
+</span><span style="color:#65737e;">}
+</span></code></pre>
+<p>最后实现分组即可</p>
+<pre data-lang="java" style="background-color:#2b303b;color:#c0c5ce;" class="language-java "><code class="language-java" data-lang="java"><span style="color:#b48ead;">public </span><span>&lt;</span><span style="color:#ebcb8b;">T</span><span>, </span><span style="color:#ebcb8b;">E</span><span>&gt; </span><span style="color:#ebcb8b;">List</span><span>&lt;</span><span style="color:#ebcb8b;">GroupBy</span><span>&lt;</span><span style="color:#ebcb8b;">T</span><span>, </span><span style="color:#ebcb8b;">E</span><span>&gt;&gt; </span><span style="color:#bf616a;">build</span><span>(</span><span style="color:#ebcb8b;">List</span><span>&lt;</span><span style="color:#ebcb8b;">E</span><span>&gt; items, </span><span style="color:#ebcb8b;">TypeDeal</span><span>&lt;</span><span style="color:#ebcb8b;">T</span><span>, </span><span style="color:#ebcb8b;">E</span><span>&gt; dealer) {
+</span><span>    </span><span style="color:#ebcb8b;">List</span><span>&lt;</span><span style="color:#ebcb8b;">GroupBy</span><span>&lt;</span><span style="color:#ebcb8b;">T</span><span>, </span><span style="color:#ebcb8b;">E</span><span>&gt;&gt; result = </span><span style="color:#b48ead;">new </span><span style="color:#ebcb8b;">ArrayList</span><span>&lt;&gt;();
+</span><span>    </span><span style="color:#b48ead;">if </span><span>(items != </span><span style="color:#d08770;">null </span><span>&amp;&amp; !items.</span><span style="color:#bf616a;">isEmpty</span><span>()) {
+</span><span>        </span><span style="color:#ebcb8b;">T</span><span> t0 = dealer.</span><span style="color:#bf616a;">make</span><span>(items.</span><span style="color:#bf616a;">get</span><span>(</span><span style="color:#d08770;">0</span><span>));
+</span><span>        </span><span style="color:#ebcb8b;">Group</span><span>&lt;</span><span style="color:#ebcb8b;">T</span><span>, </span><span style="color:#ebcb8b;">E</span><span>&gt; group = </span><span style="color:#b48ead;">new </span><span style="color:#ebcb8b;">Group</span><span>&lt;&gt;(t0);
+</span><span>        </span><span style="color:#b48ead;">for </span><span>(</span><span style="color:#ebcb8b;">E</span><span> item : items) {
+</span><span>            </span><span style="color:#ebcb8b;">T</span><span> t1 =  dealer.</span><span style="color:#bf616a;">make</span><span>(item);
+</span><span>            </span><span style="color:#b48ead;">if </span><span>(!dealer.</span><span style="color:#bf616a;">check</span><span>(t0, t1){
+</span><span>                result.</span><span style="color:#bf616a;">add</span><span>(group);
+</span><span>                t0 = t1;
+</span><span>                group = </span><span style="color:#b48ead;">new </span><span style="color:#ebcb8b;">Group</span><span>&lt;&gt;(t0);
+</span><span>            }
+</span><span>            group.</span><span style="color:#bf616a;">add</span><span>(item);
+</span><span>        }
+</span><span>        result.</span><span style="color:#bf616a;">add</span><span>(group);
+</span><span>    }
+</span><span>    </span><span style="color:#b48ead;">return</span><span> result;
+</span><span>}
+</span></code></pre>
+
+</article>
+
+
+      
+      <footer role="contentinfo">
+        <hr />
+        
+        <nav style="margin-bottom:1rem;" role="navigation">
+          
+            <a href="https://kirovj.github.io/about">About</a>
+            
+              <span>&middot;</span>
+            
+          
+            <a href="https://kirovj.github.io/atom.xml">RSS</a>
+            
+              <span>&middot;</span>
+            
+          
+            <a href="https://github.com/kirovj">Github</a>
+            
+          
+        </nav>
+        
+        
+        <small>Built with <a href="https://www.getzola.org/">Zola</a>.<br />
+          Maintained with &hearts; for the web.<br />
+          
+        </small>
+        
+      </footer>
+      
+
+    </main>
+    
+    
+  </body>
+</html>
+

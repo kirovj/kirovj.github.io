@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>JVM的激进编译 &middot; Kirovj&#x27;s Chaos</title>
+    <meta name="description" content="" />
+    <link rel="shortcut icon"  href="https://kirovj.github.io/favicon.ico" />
+    <link rel="alternate" type="application/atom+xml" title="RSS" href="https://kirovj.github.io/atom.xml">
+
+    <style>html,body{background:#fffaf7;color:#2d2d2d;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"}a,a:visited{color:darkred;text-decoration:none}a:hover{text-decoration:underline}main{margin:auto;max-width:38rem;padding:.8rem}pre{background:#fff;overflow:scroll;padding:1rem}td{border:1px solid #2d2d2d;padding:10px}img{height:auto;max-width:100%}.homepage-list{list-style:none;padding:1rem 0}.homepage-list li{align-items:center;display:flex;flex-wrap:wrap;justify-content:space-between;margin-bottom:10px}@media (max-width: 38rem){.homepage-list li a{width:100%}}</style>
+
+    <meta property="og:site_name" content="Kirovj&#x27;s Chaos">
+      <meta name="author" content="Kirovj" />
+      <meta property="og:title" content="JVM的激进编译">
+      <meta property="og:description" content="">
+      <meta property="og:url" content="https://kirovj.github.io/004-jvmde-ji-jin-bian-yi/">
+      <meta property="og:image" content="">
+
+      <meta property="og:type" content="article" />
+        <meta property="article:published_time" content="2021-04-04T00:00:00+00:00" />
+
+      
+      
+    
+
+  </head>
+  
+
+  <body>
+    <main id="main" role="main">
+
+      
+      <header role="banner">
+        <h3 style="margin-top:0;">
+          <a href="https://kirovj.github.io" title="Home">Kirovj&#x27;s Chaos</a>
+          <br /><small></small>
+        </h3>
+      </header>
+      <hr />
+      
+
+      
+<article>
+  <h1>JVM的激进编译</h1>
+
+  
+    <p style="font-size:90%;">Posted on <time datetime="2021-04-04T00:00:00+00:00">April 04, 2021</time></p>
+  
+
+  <pre data-lang="java" style="background-color:#2b303b;color:#c0c5ce;" class="language-java "><code class="language-java" data-lang="java"><span style="color:#b48ead;">public class </span><span style="color:#ebcb8b;">NoVisibility </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">private static boolean </span><span style="color:#eff1f5;">flag;  
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">private static int </span><span style="color:#eff1f5;">number;  
+</span><span style="color:#eff1f5;">  
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">private static class </span><span style="color:#ebcb8b;">ReaderThread </span><span style="color:#b48ead;">extends </span><span style="color:#a3be8c;">Thread </span><span style="color:#eff1f5;">{  
+</span><span style="color:#eff1f5;">        </span><span style="color:#b48ead;">public void </span><span style="color:#8fa1b3;">run</span><span style="color:#eff1f5;">() {  
+</span><span style="color:#eff1f5;">            </span><span style="color:#b48ead;">while </span><span style="color:#eff1f5;">(</span><span>!</span><span style="color:#eff1f5;">flag);
+</span><span style="color:#eff1f5;">            </span><span style="color:#ebcb8b;">System</span><span style="color:#eff1f5;">.out.</span><span style="color:#bf616a;">println</span><span style="color:#eff1f5;">(number);  
+</span><span style="color:#eff1f5;">        }  
+</span><span style="color:#eff1f5;">    } 
+</span><span style="color:#eff1f5;">  
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">public static void </span><span style="color:#8fa1b3;">main</span><span style="color:#eff1f5;">(</span><span style="color:#ebcb8b;">String</span><span style="color:#b48ead;">[] </span><span style="color:#bf616a;">args</span><span style="color:#eff1f5;">) </span><span style="color:#b48ead;">throws </span><span style="color:#ebcb8b;">InterruptedException </span><span style="color:#eff1f5;">{  
+</span><span style="color:#eff1f5;">        </span><span style="color:#b48ead;">new </span><span style="color:#ebcb8b;">ReaderThread</span><span style="color:#eff1f5;">().</span><span style="color:#bf616a;">start</span><span style="color:#eff1f5;">();  
+</span><span style="color:#eff1f5;">        </span><span style="color:#ebcb8b;">Thread</span><span style="color:#eff1f5;">.</span><span style="color:#bf616a;">sleep</span><span style="color:#eff1f5;">(</span><span style="color:#d08770;">1000</span><span style="color:#eff1f5;">);
+</span><span style="color:#eff1f5;">        number </span><span>= </span><span style="color:#d08770;">42</span><span style="color:#eff1f5;">;  
+</span><span style="color:#eff1f5;">        flag </span><span>= </span><span style="color:#d08770;">true</span><span style="color:#eff1f5;">;  
+</span><span style="color:#eff1f5;">        </span><span style="color:#ebcb8b;">Thread</span><span style="color:#eff1f5;">.</span><span style="color:#bf616a;">sleep</span><span style="color:#eff1f5;">(</span><span style="color:#d08770;">10000</span><span style="color:#eff1f5;">);
+</span><span style="color:#eff1f5;">    }  
+</span><span style="color:#eff1f5;">}
+</span></code></pre>
+<p>以上代码会死循环。</p>
+<p><a href="https://github.com/jonwinters/jmm-research">https://github.com/jonwinters/jmm-research</a></p>
+<blockquote>
+<p>虚拟机的激进编译的问题，虚拟机编译的时候认为 flag 是一个非 volatile 的 static 变量，激进编译后的汇编代码就只从堆内存里面取了一次这个变量的值放到寄存器里面，然后寄存器的值不会再被更新，所以就造成了死循环。</p>
+</blockquote>
+<blockquote>
+<p>反汇编看一下就知道是虚拟机 JIT 的问题，这种问题本来就是匪夷所思的，对于 static 非 volatile 变量，JVM 编译成本地代码的时候偷懒了，JVM 认为 static 非 volatile 变量不值得 反复通过内存寻址到堆内存去读取它的值，所以只读取了一次 放到 CPU 的寄存器里面就完事了，这样 CPU 永远观测不到最新的值，在某些低版本的 JDK8 或者 ARM 平台 这个代码是可以退出的。</p>
+</blockquote>
+
+</article>
+
+
+      
+      <footer role="contentinfo">
+        <hr />
+        
+        <nav style="margin-bottom:1rem;" role="navigation">
+          
+            <a href="https://kirovj.github.io/about">About</a>
+            
+              <span>&middot;</span>
+            
+          
+            <a href="https://kirovj.github.io/atom.xml">RSS</a>
+            
+              <span>&middot;</span>
+            
+          
+            <a href="https://github.com/kirovj">Github</a>
+            
+          
+        </nav>
+        
+        
+        <small>Built with <a href="https://www.getzola.org/">Zola</a>.<br />
+          Maintained with &hearts; for the web.<br />
+          
+        </small>
+        
+      </footer>
+      
+
+    </main>
+    
+    
+  </body>
+</html>
+
