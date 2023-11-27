@@ -1,8 +1,7 @@
 # The URL the site will be built for
 base_url = "https://kirovj.github.io"
-theme = "Seje2"
-default_language = "zh-tw"
-generate_feed = true
+theme = "lightspeed"
+title = "Kirovj's Chaos"
 
 # Whether to automatically compile all Sass files in the sass directory
 compile_sass = true
@@ -17,24 +16,10 @@ highlight_code = true
 
 [extra]
 # Put all your custom variables here
-seje_menu_links = [
-    { url = "$BASE_URL", name = "home" },
-    { url = "$BASE_URL/archives", name = "archives" },
-    { url = "$BASE_URL/about", name = "about" },
-    { url = "$BASE_URL/atom.xml", name = "rss" },
+author = "Kirovj"
+
+footer_links = [
+    { url = "$BASE_URL/about", name = "About" },
+    { url = "$BASE_URL/atom.xml", name = "RSS" },
+    { url = "https://github.com/kirovj", name = "Github" },
 ]
-
-[languages.zh-tw]
-title = "Kirovj's Chaos"
-
-[languages.zh-tw.translations]
-title = "Kirovj's Chaos"
-home = "主頁"
-archives = "歸檔"
-about = "關於"
-rss = "訂閱"
-more = "查看全文"
-olderArticle = "舊文"
-newer = "上一篇"
-older = "下一篇"
-loading = "加載中..."
