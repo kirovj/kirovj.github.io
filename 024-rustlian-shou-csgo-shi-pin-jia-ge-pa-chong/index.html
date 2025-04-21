@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Rust练手：csgo 饰品价格爬虫 &middot; Kirovj&#x27;s Chaos</title>
+    <meta name="description" content="" />
+    <link rel="shortcut icon"  href="https://kirovj.github.io/favicon.ico" />
+    <link rel="alternate" type="application/atom+xml" title="RSS" href="https://kirovj.github.io/atom.xml">
+
+    <style>html,body{background:#fffaf7;color:#2d2d2d;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"}a,a:visited{color:darkred;text-decoration:none}a:hover{text-decoration:underline}main{margin:auto;max-width:38rem;padding:.8rem}pre{background:#fff;overflow:scroll;padding:1rem}td{border:1px solid #2d2d2d;padding:10px}img{height:auto;max-width:100%}.homepage-list{list-style:none;padding:1rem 0}.homepage-list li{align-items:center;display:flex;flex-wrap:wrap;justify-content:space-between;margin-bottom:10px}@media (max-width: 38rem){.homepage-list li a{width:100%}}</style>
+
+    <meta property="og:site_name" content="Kirovj&#x27;s Chaos">
+      <meta name="author" content="Kirovj" />
+      <meta property="og:title" content="Rust练手：csgo 饰品价格爬虫">
+      <meta property="og:description" content="">
+      <meta property="og:url" content="https://kirovj.github.io/024-rustlian-shou-csgo-shi-pin-jia-ge-pa-chong/">
+      <meta property="og:image" content="">
+
+      <meta property="og:type" content="article" />
+        <meta property="article:published_time" content="2022-03-05T00:00:00+00:00" />
+
+      
+      
+    
+
+  </head>
+  
+
+  <body>
+    <main id="main" role="main">
+
+      
+      <header role="banner">
+        <h3 style="margin-top:0;">
+          <a href="https://kirovj.github.io" title="Home">Kirovj&#x27;s Chaos</a>
+          <br /><small></small>
+        </h3>
+      </header>
+      <hr />
+      
+
+      
+<article>
+  <h1>Rust练手：csgo 饰品价格爬虫</h1>
+
+  
+    <p style="font-size:90%;">Posted on <time datetime="2022-03-05T00:00:00+00:00">March 05, 2022</time></p>
+  
+
+  <blockquote>
+<p>学习语言的最好方法就是用它码代码，而爬虫，则再合适不过</p>
+</blockquote>
+<h2 id="cuo-guo-de-jia-ge-yi-qu-bu-fu-fan">错过的价格一去不复返</h2>
+<p>19年初接触 csgo，经历了白给-&gt;练枪-&gt;学道具-&gt;跑图-&gt;看职业选手pov，也见证了饰品价格的一路飞涨。</p>
+<p>从一千到六千的蝴蝶刀，从几块钱的贴纸到现在几万一张有价无市，几十万的玄学661、全蓝淬火。这个市场是畸形的，无论是极低的开箱出金概率，还是诈骗、屯货的奸商、垄断的交易平台、以及没有人想要把自己买来的饰品降价出手。</p>
+<p>每当普通玩家想要购买一把刀、一双手套，或者是好看的枪皮，都会考虑许久。买了之后价格会不会跌？卖的时候能不能至少卖出原价？而当你想要看看价格历史走势的时候，却发现垄断的平台只让你看到六个月的数据──这还需要积分换取。</p>
+<p>这个需求就是由此而来，如果一切顺利的话，我想要在几年后看到这段时间饰品价格的起起落落甚至一窥游戏的兴衰。</p>
+<h2 id="rust-reqwest-serde-sqlite">Rust, Reqwest, Serde, Sqlite</h2>
+<p>语言，http，序列化/反序列化，数据库。</p>
+<p>学习语言的最好方法就是用它码代码，而爬虫，则再合适不过。从 python 到 java 再到 go 最后是 rust，我记得学习他们的第一个项目都是爬虫。</p>
+<p>可以是几行代码的脚本，也可以是几个函数，面向对象？当然可以，工程化？你想要也可以。由浅至深，你可以了解最基本的 http 协议，html 解析，正则表达式，json 反序列化，数据库，并发，反反爬，逆向，验证码破解……</p>
+<h2 id="http-reqwest">http: Reqwest</h2>
+<p>http.rs</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>std::collections::HashMap;
+</span><span style="color:#b48ead;">use </span><span>reqwest::header::{HeaderMap, HeaderValue};
+</span><span style="color:#b48ead;">use crate</span><span>::utils::</span><span style="color:#d08770;">UA</span><span>;
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">make_headers</span><span>() -&gt; HeaderMap {
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> map = HeaderMap::new();
+</span><span>    map.</span><span style="color:#96b5b4;">insert</span><span>(&quot;</span><span style="color:#a3be8c;">user-agent</span><span>&quot;, HeaderValue::from_static(</span><span style="color:#d08770;">UA</span><span>));
+</span><span>    map
+</span><span>}
+</span><span>
+</span><span>lazy_static! {
+</span><span>    </span><span style="color:#b48ead;">static ref </span><span style="color:#d08770;">CLIENT</span><span>: reqwest::blocking::Client = reqwest::blocking::Client::builder()
+</span><span>        .</span><span style="color:#96b5b4;">default_headers</span><span>(</span><span style="color:#96b5b4;">make_headers</span><span>())
+</span><span>        .</span><span style="color:#96b5b4;">build</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">enum </span><span>Method {
+</span><span>    Get,
+</span><span>    PostJson,
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">request</span><span>(
+</span><span>    </span><span style="color:#bf616a;">url</span><span>: &amp;</span><span style="color:#b48ead;">str</span><span>,
+</span><span>    </span><span style="color:#bf616a;">method</span><span>: Method,
+</span><span>    </span><span style="color:#bf616a;">data</span><span>: Option&lt;&amp;HashMap&lt;&amp;</span><span style="color:#b48ead;">str</span><span>, &amp;</span><span style="color:#b48ead;">str</span><span>&gt;&gt;,
+</span><span>) -&gt; Result&lt;String, reqwest::Error&gt; {
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> times = </span><span style="color:#d08770;">1</span><span>;
+</span><span>    </span><span style="color:#b48ead;">loop </span><span>{
+</span><span>        </span><span style="color:#65737e;">// 失败重试的简陋实现
+</span><span>        </span><span style="color:#b48ead;">let</span><span> r = </span><span style="color:#b48ead;">match</span><span> method {
+</span><span>            Method::Get =&gt; </span><span style="color:#d08770;">CLIENT</span><span>.</span><span style="color:#96b5b4;">get</span><span>(url).</span><span style="color:#96b5b4;">send</span><span>()?.</span><span style="color:#96b5b4;">text</span><span>(),
+</span><span>            Method::PostJson =&gt; </span><span style="color:#d08770;">CLIENT</span><span>.</span><span style="color:#96b5b4;">post</span><span>(url).</span><span style="color:#96b5b4;">json</span><span>(data.</span><span style="color:#96b5b4;">unwrap</span><span>()).</span><span style="color:#96b5b4;">send</span><span>()?.</span><span style="color:#96b5b4;">text</span><span>(),
+</span><span>        };
+</span><span>        </span><span style="color:#b48ead;">if </span><span>!r.</span><span style="color:#96b5b4;">is_ok</span><span>() &amp;&amp; times &lt; </span><span style="color:#d08770;">3 </span><span>{
+</span><span>            times += </span><span style="color:#d08770;">1</span><span>;
+</span><span>            </span><span style="color:#b48ead;">continue</span><span>;
+</span><span>        }
+</span><span>        </span><span style="color:#b48ead;">break</span><span> r;
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<h2 id="database-rusqlite">database: Rusqlite</h2>
+<p>db.rs</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use crate</span><span>::item::{Item, PriceInfo};
+</span><span style="color:#b48ead;">use </span><span>rusqlite::{params, Connection, Result};
+</span><span style="color:#b48ead;">use </span><span>std::path::Path;
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">create_db</span><span>(</span><span style="color:#bf616a;">db_file</span><span>: &amp;</span><span style="color:#b48ead;">str</span><span>) -&gt; Result&lt;(), rusqlite::Error&gt; {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> conn = Connection::open(db_file)?;
+</span><span>    </span><span style="color:#b48ead;">let </span><span>_ = conn.</span><span style="color:#96b5b4;">execute</span><span>(
+</span><span>        &quot;</span><span style="color:#a3be8c;">create table Item (
+</span><span style="color:#a3be8c;">        id        INTEGER PRIMARY KEY AUTOINCREMENT,
+</span><span style="color:#a3be8c;">        name      VARCHAR NOT NULL,
+</span><span style="color:#a3be8c;">        class     CHAR(16) NOT NULL,
+</span><span style="color:#a3be8c;">        typo      CHAR(32) NOT NULL,
+</span><span style="color:#a3be8c;">        ware      CHAR(16) NOT NULL,
+</span><span style="color:#a3be8c;">        quality   CHAR(16) NOT NULL,
+</span><span style="color:#a3be8c;">        rarity    CHAR(16) NOT NULL,
+</span><span style="color:#a3be8c;">        stat_trak INTEGER NOT NULL
+</span><span style="color:#a3be8c;">    )</span><span>&quot;,
+</span><span>        [],
+</span><span>    );
+</span><span>    </span><span style="color:#b48ead;">let </span><span>_ = conn.</span><span style="color:#96b5b4;">execute</span><span>(
+</span><span>        &quot;</span><span style="color:#a3be8c;">create table PriceInfo (
+</span><span style="color:#a3be8c;">        id      INTEGER PRIMARY KEY AUTOINCREMENT,
+</span><span style="color:#a3be8c;">        item_id INTEGER NOT NULL,
+</span><span style="color:#a3be8c;">        date    CHAR(16) NOT NULL,
+</span><span style="color:#a3be8c;">        price   NUMERIC(10,1) NOT NULL
+</span><span style="color:#a3be8c;">    )</span><span>&quot;,
+</span><span>        [],
+</span><span>    );
+</span><span>    Ok(())
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">pub struct </span><span>DbHelper {
+</span><span>    </span><span style="color:#bf616a;">conn</span><span>: Connection,
+</span><span>}
+</span><span>
+</span><span>#[</span><span style="color:#bf616a;">allow</span><span>(unused)]
+</span><span style="color:#b48ead;">impl </span><span>DbHelper {
+</span><span>    </span><span style="color:#b48ead;">pub fn </span><span style="color:#8fa1b3;">new</span><span>(</span><span style="color:#bf616a;">db_file</span><span>: &amp;</span><span style="color:#b48ead;">str</span><span>) -&gt; DbHelper {
+</span><span>        </span><span style="color:#b48ead;">if </span><span>!Path::new(db_file).</span><span style="color:#96b5b4;">exists</span><span>() {
+</span><span>            </span><span style="color:#96b5b4;">create_db</span><span>(db_file);
+</span><span>        }
+</span><span>        </span><span style="color:#b48ead;">let</span><span> conn = Connection::open(db_file).</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>        DbHelper { conn }
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">find_item_id</span><span>(&amp;</span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">item</span><span>: &amp;Item) -&gt; Result&lt;</span><span style="color:#b48ead;">u32</span><span>&gt; {
+</span><span>        </span><span style="color:#b48ead;">let mut</span><span> stmt = </span><span style="color:#bf616a;">self
+</span><span>            .conn
+</span><span>            .</span><span style="color:#96b5b4;">prepare</span><span>(
+</span><span>                &quot;</span><span style="color:#a3be8c;">SELECT id from Item
+</span><span style="color:#a3be8c;">            where name = ?1
+</span><span style="color:#a3be8c;">            and class = ?2
+</span><span style="color:#a3be8c;">            and typo = ?3
+</span><span style="color:#a3be8c;">            and ware = ?4
+</span><span style="color:#a3be8c;">            and quality = ?5
+</span><span style="color:#a3be8c;">            and rarity = ?6
+</span><span style="color:#a3be8c;">            and stat_trak = ?7</span><span>&quot;,
+</span><span>            )
+</span><span>            .</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>        stmt.</span><span style="color:#96b5b4;">query_row</span><span>(
+</span><span>            params![
+</span><span>                item.name,
+</span><span>                item.class,
+</span><span>                item.typo,
+</span><span>                item.ware,
+</span><span>                item.quality,
+</span><span>                item.rarity,
+</span><span>                item.stat_trak
+</span><span>            ],
+</span><span>            |</span><span style="color:#bf616a;">row</span><span>| row.</span><span style="color:#96b5b4;">get</span><span>(</span><span style="color:#d08770;">0</span><span>),
+</span><span>        )
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">pub fn </span><span style="color:#8fa1b3;">get_item_id</span><span>(&amp;</span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">item</span><span>: &amp;Item) -&gt; Option&lt;</span><span style="color:#b48ead;">u32</span><span>&gt; {
+</span><span>        </span><span style="color:#b48ead;">match </span><span style="color:#bf616a;">self</span><span>.</span><span style="color:#96b5b4;">find_item_id</span><span>(item) {
+</span><span>            Ok(id) =&gt; Some(id),
+</span><span>            _ =&gt; {
+</span><span>                </span><span style="color:#bf616a;">self</span><span>.</span><span style="color:#96b5b4;">add_item</span><span>(item);
+</span><span>                </span><span style="color:#b48ead;">match </span><span style="color:#bf616a;">self</span><span>.</span><span style="color:#96b5b4;">find_item_id</span><span>(item) {
+</span><span>                    Ok(_id) =&gt; Some(_id),
+</span><span>                    _ =&gt; None,
+</span><span>                }
+</span><span>            }
+</span><span>        }
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">pub fn </span><span style="color:#8fa1b3;">add_item</span><span>(&amp;</span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">item</span><span>: &amp;Item) {
+</span><span>        </span><span style="color:#bf616a;">self</span><span>.conn.</span><span style="color:#96b5b4;">execute</span><span>(
+</span><span>            &quot;</span><span style="color:#a3be8c;">INSERT INTO Item
+</span><span style="color:#a3be8c;">            (name, class, typo, ware, quality, rarity, stat_trak)
+</span><span style="color:#a3be8c;">            VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7)</span><span>&quot;,
+</span><span>            params![
+</span><span>                item.name,
+</span><span>                item.class,
+</span><span>                item.typo,
+</span><span>                item.ware,
+</span><span>                item.quality,
+</span><span>                item.rarity,
+</span><span>                item.stat_trak
+</span><span>            ],
+</span><span>        );
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">pub fn </span><span style="color:#8fa1b3;">find_price_info_id</span><span>(&amp;</span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">price_info</span><span>: &amp;PriceInfo) -&gt; Result&lt;</span><span style="color:#b48ead;">usize</span><span>&gt; {
+</span><span>        </span><span style="color:#b48ead;">let mut</span><span> stmt = </span><span style="color:#bf616a;">self
+</span><span>            .conn
+</span><span>            .</span><span style="color:#96b5b4;">prepare</span><span>(&quot;</span><span style="color:#a3be8c;">SELECT id from PriceInfo where item_id = ?1 and date = ?2</span><span>&quot;)
+</span><span>            .</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>        stmt.</span><span style="color:#96b5b4;">query_row</span><span>(params![price_info.item_id, price_info.date], |</span><span style="color:#bf616a;">row</span><span>| {
+</span><span>            row.</span><span style="color:#96b5b4;">get</span><span>(</span><span style="color:#d08770;">0</span><span>)
+</span><span>        })
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">pub fn </span><span style="color:#8fa1b3;">add_price_info</span><span>(&amp;</span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">price_info</span><span>: &amp;PriceInfo) {
+</span><span>        </span><span style="color:#b48ead;">match </span><span style="color:#bf616a;">self</span><span>.</span><span style="color:#96b5b4;">find_price_info_id</span><span>(price_info) {
+</span><span>            Ok(id) =&gt; {
+</span><span>                </span><span style="color:#bf616a;">self</span><span>.conn.</span><span style="color:#96b5b4;">execute</span><span>(
+</span><span>                    &quot;</span><span style="color:#a3be8c;">update PriceInfo set price = ?1 where id = ?2</span><span>&quot;,
+</span><span>                    params![price_info.price, id],
+</span><span>                );
+</span><span>            }
+</span><span>            _ =&gt; {
+</span><span>                </span><span style="color:#bf616a;">self</span><span>.conn.</span><span style="color:#96b5b4;">execute</span><span>(
+</span><span>                    &quot;</span><span style="color:#a3be8c;">INSERT INTO PriceInfo (item_id, date, price) VALUES(?1, ?2, ?3)</span><span>&quot;,
+</span><span>                    params![price_info.item_id, price_info.date, price_info.price,],
+</span><span>                );
+</span><span>            }
+</span><span>        }
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<h2 id="crawler">crawler</h2>
+<p>crawler.rs</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">pub trait </span><span>Crawl {
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">name</span><span>(&amp;</span><span style="color:#bf616a;">self</span><span>) -&gt; &amp;</span><span style="color:#b48ead;">str</span><span>;
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">alert</span><span>(&amp;</span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">message</span><span>: &amp;</span><span style="color:#b48ead;">str</span><span>) {
+</span><span>        </span><span style="color:#b48ead;">let</span><span> message = format!(&quot;</span><span style="color:#a3be8c;">[</span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;">] </span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;">: </span><span style="color:#d08770;">{}</span><span>&quot;, utils::current_time(), </span><span style="color:#bf616a;">self</span><span>.</span><span style="color:#96b5b4;">name</span><span>(), message);
+</span><span>        println!(&quot;</span><span style="color:#d08770;">{}</span><span>&quot;, message);
+</span><span>        utils::alert(message.</span><span style="color:#96b5b4;">as_str</span><span>());
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">db</span><span>(&amp;</span><span style="color:#bf616a;">self</span><span>) -&gt; &amp;DbHelper;
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">run</span><span>(&amp;</span><span style="color:#bf616a;">self</span><span>);
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">persistent</span><span>(&amp;</span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">item</span><span>: Item, </span><span style="color:#bf616a;">price</span><span>: &amp;</span><span style="color:#b48ead;">str</span><span>) {
+</span><span>        </span><span style="color:#b48ead;">match</span><span> price.parse::&lt;</span><span style="color:#b48ead;">f32</span><span>&gt;() {
+</span><span>            Ok(p) =&gt; </span><span style="color:#b48ead;">match </span><span style="color:#bf616a;">self</span><span>.</span><span style="color:#96b5b4;">db</span><span>().</span><span style="color:#96b5b4;">get_item_id</span><span>(&amp;item) {
+</span><span>                None =&gt; {}
+</span><span>                Some(id) =&gt; {
+</span><span>                    </span><span style="color:#bf616a;">self</span><span>.</span><span style="color:#96b5b4;">db</span><span>().</span><span style="color:#96b5b4;">add_price_info</span><span>(&amp;PriceInfo::new(
+</span><span>                        id,
+</span><span>                        utils::current_date(),
+</span><span>                        utils::round(p),
+</span><span>                    ));
+</span><span>                }
+</span><span>            },
+</span><span>            _ =&gt; </span><span style="color:#bf616a;">self</span><span>.</span><span style="color:#96b5b4;">alert</span><span>(format!(&quot;</span><span style="color:#a3be8c;">parse price </span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;"> err</span><span>&quot;, price).</span><span style="color:#96b5b4;">as_str</span><span>()),
+</span><span>        }
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">sleep</span><span>(&amp;</span><span style="color:#bf616a;">self</span><span>) {
+</span><span>        thread::sleep(time::Duration::from_secs(
+</span><span>            rand::thread_rng().</span><span style="color:#96b5b4;">gen_range</span><span>(</span><span style="color:#d08770;">20</span><span>..</span><span style="color:#d08770;">40</span><span>),
+</span><span>        ));
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<h2 id="license">License</h2>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>GPL-2.0
+</span></code></pre>
+<h2 id="warning">Warning</h2>
+<p>爬虫写得好──牢饭吃得早，切记。所以：</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>Open source if you want to create your own version.
+</span><span>如果你想要开发自己的版本，请开源并遵守协议。
+</span><span>
+</span><span>Do not use it in an illegal way.
+</span><span>不要非法使用。
+</span><span>
+</span><span>Do not use data in an illegal way.
+</span><span>不要非法使用通过它爬的数据。
+</span><span>
+</span><span>I take no responsibility.
+</span><span>我不负任何责任。
+</span></code></pre>
+<blockquote>
+<p>Github: <a href="https://github.com/kirovj/rscsgo">github.com/kirovj/csgo-crawler</a></p>
+</blockquote>
+
+</article>
+
+
+      
+      <footer role="contentinfo">
+        <hr />
+        
+        <nav style="margin-bottom:1rem;" role="navigation">
+          
+            <a href="https://kirovj.github.io/about">About</a>
+            
+              <span>&middot;</span>
+            
+          
+            <a href="https://kirovj.github.io/atom.xml">RSS</a>
+            
+              <span>&middot;</span>
+            
+          
+            <a href="https://github.com/kirovj">Github</a>
+            
+          
+        </nav>
+        
+        
+        <small>Built with <a href="https://www.getzola.org/">Zola</a>.<br />
+          Maintained with &hearts; for the web.<br />
+          
+        </small>
+        
+      </footer>
+      
+
+    </main>
+    
+    
+  </body>
+</html>
+

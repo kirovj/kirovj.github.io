@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>需要调用HttpURLConnection disconnect()吗？ &middot; Kirovj&#x27;s Chaos</title>
+    <meta name="description" content="" />
+    <link rel="shortcut icon"  href="https://kirovj.github.io/favicon.ico" />
+    <link rel="alternate" type="application/atom+xml" title="RSS" href="https://kirovj.github.io/atom.xml">
+
+    <style>html,body{background:#fffaf7;color:#2d2d2d;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"}a,a:visited{color:darkred;text-decoration:none}a:hover{text-decoration:underline}main{margin:auto;max-width:38rem;padding:.8rem}pre{background:#fff;overflow:scroll;padding:1rem}td{border:1px solid #2d2d2d;padding:10px}img{height:auto;max-width:100%}.homepage-list{list-style:none;padding:1rem 0}.homepage-list li{align-items:center;display:flex;flex-wrap:wrap;justify-content:space-between;margin-bottom:10px}@media (max-width: 38rem){.homepage-list li a{width:100%}}</style>
+
+    <meta property="og:site_name" content="Kirovj&#x27;s Chaos">
+      <meta name="author" content="Kirovj" />
+      <meta property="og:title" content="需要调用HttpURLConnection disconnect()吗？">
+      <meta property="og:description" content="">
+      <meta property="og:url" content="https://kirovj.github.io/006-xu-yao-diao-yong-httpurlconnection-disconnect-ma/">
+      <meta property="og:image" content="">
+
+      <meta property="og:type" content="article" />
+        <meta property="article:published_time" content="2021-05-06T00:00:00+00:00" />
+
+      
+      
+    
+
+  </head>
+  
+
+  <body>
+    <main id="main" role="main">
+
+      
+      <header role="banner">
+        <h3 style="margin-top:0;">
+          <a href="https://kirovj.github.io" title="Home">Kirovj&#x27;s Chaos</a>
+          <br /><small></small>
+        </h3>
+      </header>
+      <hr />
+      
+
+      
+<article>
+  <h1>需要调用HttpURLConnection disconnect()吗？</h1>
+
+  
+    <p style="font-size:90%;">Posted on <time datetime="2021-05-06T00:00:00+00:00">May 06, 2021</time></p>
+  
+
+  <blockquote>
+<p>翻译自<a href="https://kingori.co/minutae/2013/04/httpurlconnection-disconnect/">kingori.co</a></p>
+</blockquote>
+<p>额，虽然要看情况，但是一般来说...</p>
+<p>no.</p>
+<p>是的，不需要。</p>
+<p>see the <a href="https://docs.oracle.com/javase/7/docs/api/java/net/HttpURLConnection.html">javadoc</a></p>
+<blockquote>
+<p>Each HttpURLConnection instance is used to make a single request but the underlying network connection to the HTTP server may be transparently shared by other instances. Calling the close() methods on the InputStream or OutputStream of an HttpURLConnection after a request may free network resources associated with this instance but has no effect on any shared persistent connection. Calling the disconnect() method may close the underlying socket if a persistent connection is otherwise idle at that time.</p>
+</blockquote>
+<blockquote>
+<p>每个HttpURLConnection实例都用于发出单个请求，但其他实例可以透明地共享与HTTP服务器的基础网络连接。 请求后在HttpURLConnection的InputStream或OutputStream上调用close()方法可能会释放与此实例关联的网络资源，但对任何共享的持久连接都没有影响。<em><strong>如果持久连接当时处于空闲状态，则调用disconnect()方法可能会关闭基础Socket</strong></em>。</p>
+</blockquote>
+<p>简单来说：</p>
+<blockquote>
+<p>I don’t say it is a mistake. But, disconnect is extreme case (socket close open operations are costly), unless you really want I wouldn’t go for it. stream.close() releases most of the network resources and should be enough. Again, if your requirement is ok to create socket everytime, there is nothing wrong in calling disconnect.  ~ <a href="https://stackoverflow.com/questions/11056088/do-i-need-to-call-httpurlconnection-disconnect-after-finish-using-it#comment14465352_11056207">Nambari</a></p>
+</blockquote>
+<blockquote>
+<p>我不是说这是错误的。但是断开连接是极端情况（<em><strong>Socket关闭打开操作的成本很高</strong></em>），除非您真的希望，而我不会这么做。stream.close()释放了大部分网络资源，应该足够了。同样，如果您的需求是每次都创建Socket，那就调用disconnect()吧。</p>
+</blockquote>
+<p>例子：</p>
+<pre data-lang="java" style="background-color:#2b303b;color:#c0c5ce;" class="language-java "><code class="language-java" data-lang="java"><span style="color:#65737e;">//Initialize variables
+</span><span style="color:#ebcb8b;">InputStream</span><span> responseInputStream = </span><span style="color:#d08770;">null</span><span>;
+</span><span style="color:#ebcb8b;">HttpURLConnection</span><span> conn = </span><span style="color:#d08770;">null</span><span>;
+</span><span style="color:#b48ead;">int</span><span> responseCode = -</span><span style="color:#d08770;">1</span><span>;
+</span><span>
+</span><span style="color:#b48ead;">try </span><span>{
+</span><span>	</span><span style="color:#65737e;">// Create a connection
+</span><span>	</span><span style="color:#ebcb8b;">URL</span><span> url = </span><span style="color:#b48ead;">new </span><span style="color:#ebcb8b;">URL</span><span>(targetURL);
+</span><span>	conn = (</span><span style="color:#ebcb8b;">HttpURLConnection</span><span>) url.</span><span style="color:#bf616a;">openConnection</span><span>();
+</span><span>	
+</span><span>	</span><span style="color:#65737e;">// Starts the connection
+</span><span>	conn.</span><span style="color:#bf616a;">connect</span><span>();
+</span><span>
+</span><span>	</span><span style="color:#65737e;">// Get the response code
+</span><span>	responseCode = conn.</span><span style="color:#bf616a;">getResponseCode</span><span>();
+</span><span>	</span><span style="color:#b48ead;">if </span><span>(responseCode &lt; </span><span style="color:#d08770;">400</span><span>) {
+</span><span>		</span><span style="color:#65737e;">// Get the response InputStream if all is well
+</span><span>		responseInputStream = conn.</span><span style="color:#bf616a;">getInputStream</span><span>();
+</span><span>	} </span><span style="color:#b48ead;">else if </span><span>(responseCode &gt;= </span><span style="color:#d08770;">400</span><span>) {
+</span><span>		</span><span style="color:#65737e;">// Get the response ErrorStream if we got an error instead
+</span><span>		responseInputStream = conn.</span><span style="color:#bf616a;">getErrorStream</span><span>();
+</span><span>	}
+</span><span>} </span><span style="color:#b48ead;">catch </span><span>(</span><span style="color:#ebcb8b;">IOException </span><span style="color:#bf616a;">e</span><span>) {
+</span><span>	</span><span style="color:#65737e;">// YOU CAN DO WHATEVER HERE
+</span><span>} </span><span style="color:#b48ead;">finally </span><span>{
+</span><span>	</span><span style="color:#65737e;">// Makes sure that the InputStream is closed after
+</span><span>	</span><span style="color:#65737e;">// we are done with it
+</span><span>	</span><span style="color:#b48ead;">if </span><span>(responseInputStream != </span><span style="color:#d08770;">null</span><span>) {
+</span><span>		</span><span style="color:#b48ead;">try </span><span>{
+</span><span>			responseInputStream.</span><span style="color:#bf616a;">close</span><span>();
+</span><span>		} </span><span style="color:#b48ead;">catch </span><span>(</span><span style="color:#ebcb8b;">IOException </span><span style="color:#bf616a;">e</span><span>) {
+</span><span>			</span><span style="color:#65737e;">// YOU CAN DO WHATEVER HERE
+</span><span>		}
+</span><span>	}
+</span><span>}
+</span></code></pre>
+<p><em><strong>And that is enough.</strong></em></p>
+<p>thanks:</p>
+<ul>
+<li><a href="https://stackoverflow.com/questions/11056088/do-i-need-to-call-httpurlconnection-disconnect-after-finish-using-it">Do I need to call HttpURLConnection.disconnect after finish using it</a></li>
+<li><a href="https://kingori.co/minutae/2013/04/httpurlconnection-disconnect/">Do we need to call HttpURLConnection.disconnect()?</a></li>
+</ul>
+
+</article>
+
+
+      
+      <footer role="contentinfo">
+        <hr />
+        
+        <nav style="margin-bottom:1rem;" role="navigation">
+          
+            <a href="https://kirovj.github.io/about">About</a>
+            
+              <span>&middot;</span>
+            
+          
+            <a href="https://kirovj.github.io/atom.xml">RSS</a>
+            
+              <span>&middot;</span>
+            
+          
+            <a href="https://github.com/kirovj">Github</a>
+            
+          
+        </nav>
+        
+        
+        <small>Built with <a href="https://www.getzola.org/">Zola</a>.<br />
+          Maintained with &hearts; for the web.<br />
+          
+        </small>
+        
+      </footer>
+      
+
+    </main>
+    
+    
+  </body>
+</html>
+

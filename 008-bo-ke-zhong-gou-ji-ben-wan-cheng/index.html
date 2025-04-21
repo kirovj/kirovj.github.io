@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>博客重构基本完成 &middot; Kirovj&#x27;s Chaos</title>
+    <meta name="description" content="" />
+    <link rel="shortcut icon"  href="https://kirovj.github.io/favicon.ico" />
+    <link rel="alternate" type="application/atom+xml" title="RSS" href="https://kirovj.github.io/atom.xml">
+
+    <style>html,body{background:#fffaf7;color:#2d2d2d;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"}a,a:visited{color:darkred;text-decoration:none}a:hover{text-decoration:underline}main{margin:auto;max-width:38rem;padding:.8rem}pre{background:#fff;overflow:scroll;padding:1rem}td{border:1px solid #2d2d2d;padding:10px}img{height:auto;max-width:100%}.homepage-list{list-style:none;padding:1rem 0}.homepage-list li{align-items:center;display:flex;flex-wrap:wrap;justify-content:space-between;margin-bottom:10px}@media (max-width: 38rem){.homepage-list li a{width:100%}}</style>
+
+    <meta property="og:site_name" content="Kirovj&#x27;s Chaos">
+      <meta name="author" content="Kirovj" />
+      <meta property="og:title" content="博客重构基本完成">
+      <meta property="og:description" content="">
+      <meta property="og:url" content="https://kirovj.github.io/008-bo-ke-zhong-gou-ji-ben-wan-cheng/">
+      <meta property="og:image" content="">
+
+      <meta property="og:type" content="article" />
+        <meta property="article:published_time" content="2021-07-01T00:00:00+00:00" />
+
+      
+      
+    
+
+  </head>
+  
+
+  <body>
+    <main id="main" role="main">
+
+      
+      <header role="banner">
+        <h3 style="margin-top:0;">
+          <a href="https://kirovj.github.io" title="Home">Kirovj&#x27;s Chaos</a>
+          <br /><small></small>
+        </h3>
+      </header>
+      <hr />
+      
+
+      
+<article>
+  <h1>博客重构基本完成</h1>
+
+  
+    <p style="font-size:90%;">Posted on <time datetime="2021-07-01T00:00:00+00:00">July 01, 2021</time></p>
+  
+
+  <blockquote>
+<p>之前的博客和News都是springboot框架搭建，内容存在h2 database。用了一段时间发现内存占用很大(主要是因为news是通过kafka传过来)。而且看着前端样式越来越不顺眼，所以打算用golang重构一下。</p>
+</blockquote>
+<h2 id="ji-ge-bu-yi-yang-de-di-fang">几个不一样的地方</h2>
+<ol>
+<li>
+<p>底层的web框架是自己学习的Gee框架写的<a href="https://github.com/kirovj/girov">girov</a>，而不是开源框架</p>
+</li>
+<li>
+<p>通过渲染markdown文件的方式返回html。而不是之前将markdown存在h2，在前端用markd.js渲染</p>
+</li>
+<li>
+<p>用golang重构并精简了内容，一来熟悉go，同时减轻服务器压力</p>
+</li>
+</ol>
+<h2 id="todo">TODO:</h2>
+<ul>
+<li>重构News爬虫</li>
+<li>新增movies节点</li>
+</ul>
+<p>ps: 感谢<a href="https://vnf.cc/">HKL's Notes</a>开源的主题</p>
+<p>ps: 顺便祝伟大的中国共产党百岁生日快乐!(逃</p>
+
+</article>
+
+
+      
+      <footer role="contentinfo">
+        <hr />
+        
+        <nav style="margin-bottom:1rem;" role="navigation">
+          
+            <a href="https://kirovj.github.io/about">About</a>
+            
+              <span>&middot;</span>
+            
+          
+            <a href="https://kirovj.github.io/atom.xml">RSS</a>
+            
+              <span>&middot;</span>
+            
+          
+            <a href="https://github.com/kirovj">Github</a>
+            
+          
+        </nav>
+        
+        
+        <small>Built with <a href="https://www.getzola.org/">Zola</a>.<br />
+          Maintained with &hearts; for the web.<br />
+          
+        </small>
+        
+      </footer>
+      
+
+    </main>
+    
+    
+  </body>
+</html>
+

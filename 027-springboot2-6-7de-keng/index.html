@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Springboot2.6.7的坑 &middot; Kirovj&#x27;s Chaos</title>
+    <meta name="description" content="" />
+    <link rel="shortcut icon"  href="https://kirovj.github.io/favicon.ico" />
+    <link rel="alternate" type="application/atom+xml" title="RSS" href="https://kirovj.github.io/atom.xml">
+
+    <style>html,body{background:#fffaf7;color:#2d2d2d;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"}a,a:visited{color:darkred;text-decoration:none}a:hover{text-decoration:underline}main{margin:auto;max-width:38rem;padding:.8rem}pre{background:#fff;overflow:scroll;padding:1rem}td{border:1px solid #2d2d2d;padding:10px}img{height:auto;max-width:100%}.homepage-list{list-style:none;padding:1rem 0}.homepage-list li{align-items:center;display:flex;flex-wrap:wrap;justify-content:space-between;margin-bottom:10px}@media (max-width: 38rem){.homepage-list li a{width:100%}}</style>
+
+    <meta property="og:site_name" content="Kirovj&#x27;s Chaos">
+      <meta name="author" content="Kirovj" />
+      <meta property="og:title" content="Springboot2.6.7的坑">
+      <meta property="og:description" content="">
+      <meta property="og:url" content="https://kirovj.github.io/027-springboot2-6-7de-keng/">
+      <meta property="og:image" content="">
+
+      <meta property="og:type" content="article" />
+        <meta property="article:published_time" content="2022-06-03T00:00:00+00:00" />
+
+      
+      
+    
+
+  </head>
+  
+
+  <body>
+    <main id="main" role="main">
+
+      
+      <header role="banner">
+        <h3 style="margin-top:0;">
+          <a href="https://kirovj.github.io" title="Home">Kirovj&#x27;s Chaos</a>
+          <br /><small></small>
+        </h3>
+      </header>
+      <hr />
+      
+
+      
+<article>
+  <h1>Springboot2.6.7的坑</h1>
+
+  
+    <p style="font-size:90%;">Posted on <time datetime="2022-06-03T00:00:00+00:00">June 03, 2022</time></p>
+  
+
+  <blockquote>
+<p>有些依赖，不要选择最新的版本</p>
+</blockquote>
+<p>在使用 JPA 的简单查询 findAllByNameContainsIgnoreCase 时，第一次正常，之后就会一直报错。</p>
+<p>说实话，我是真没想到这是一个 hibernate 的 bug。</p>
+<p><a href="https://github.com/spring-projects/spring-data-jpa/issues/2472">https://github.com/spring-projects/spring-data-jpa/issues/2472</a></p>
+<p>在 hibernate 版本 5.6.6 ~ 5.6.8 中用 startwith 以及 like 查询都会出现这个问题，该 bug 已在 hibernate 版本 5.6.9 中得到修复(<a href="https://hibernate.atlassian.net/browse/HHH-15142">HHH-15142</a> - Hibernate JIRA)</p>
+<p>最后，将 Springboot 版本从 2.6.7 降到 2.6.3 后就不再报错。</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>java.lang.IllegalArgumentException: Parameter value [\] did not match expected type [java.lang.String (n/a)]
+</span><span>	at org.hibernate.query.spi.QueryParameterBindingValidator.validate(QueryParameterBindingValidator.java:54) ~[hibernate-core-5.6.8.Final.jar:5.6.8.Final]
+</span><span>	at org.hibernate.query.spi.QueryParameterBindingValidator.validate(QueryParameterBindingValidator.java:27) ~[hibernate-core-5.6.8.Final.jar:5.6.8.Final]
+</span><span>	at org.hibernate.query.internal.QueryParameterBindingImpl.validate(QueryParameterBindingImpl.java:90) ~[hibernate-core-5.6.8.Final.jar:5.6.8.Final]
+</span><span>	at org.hibernate.query.internal.QueryParameterBindingImpl.setBindValue(QueryParameterBindingImpl.java:55) ~[hibernate-core-5.6.8.Final.jar:5.6.8.Final]
+</span><span>	at org.hibernate.query.internal.AbstractProducedQuery.setParameter(AbstractProducedQuery.java:501) ~[hibernate-core-5.6.8.Final.jar:5.6.8.Final]
+</span><span>	at org.hibernate.query.internal.AbstractProducedQuery.setParameter(AbstractProducedQuery.java:122) ~[hibernate-core-5.6.8.Final.jar:5.6.8.Final]
+</span><span>	at org.hibernate.query.criteria.internal.compile.CriteriaCompiler$1$1.bind(CriteriaCompiler.java:141) ~[hibernate-core-5.6.8.Final.jar:5.6.8.Final]
+</span><span>	at org.hibernate.query.criteria.internal.CriteriaQueryImpl$1.buildCompiledQuery(CriteriaQueryImpl.java:364) ~[hibernate-core-5.6.8.Final.jar:5.6.8.Final]
+</span><span>	at org.hibernate.query.criteria.internal.compile.CriteriaCompiler.compile(CriteriaCompiler.java:171) ~[hibernate-core-5.6.8.Final.jar:5.6.8.Final]
+</span><span>	at org.hibernate.internal.AbstractSharedSessionContract.createQuery(AbstractSharedSessionContract.java:774) ~[hibernate-core-5.6.8.Final.jar:5.6.8.Final]
+</span><span>	at org.hibernate.internal.AbstractSharedSessionContract.createQuery(AbstractSharedSessionContract.java:114) ~[hibernate-core-5.6.8.Final.jar:5.6.8.Final]
+</span><span>    ...
+</span></code></pre>
+
+</article>
+
+
+      
+      <footer role="contentinfo">
+        <hr />
+        
+        <nav style="margin-bottom:1rem;" role="navigation">
+          
+            <a href="https://kirovj.github.io/about">About</a>
+            
+              <span>&middot;</span>
+            
+          
+            <a href="https://kirovj.github.io/atom.xml">RSS</a>
+            
+              <span>&middot;</span>
+            
+          
+            <a href="https://github.com/kirovj">Github</a>
+            
+          
+        </nav>
+        
+        
+        <small>Built with <a href="https://www.getzola.org/">Zola</a>.<br />
+          Maintained with &hearts; for the web.<br />
+          
+        </small>
+        
+      </footer>
+      
+
+    </main>
+    
+    
+  </body>
+</html>
+

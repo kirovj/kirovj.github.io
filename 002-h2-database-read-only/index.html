@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>h2 database read only &middot; Kirovj&#x27;s Chaos</title>
+    <meta name="description" content="" />
+    <link rel="shortcut icon"  href="https://kirovj.github.io/favicon.ico" />
+    <link rel="alternate" type="application/atom+xml" title="RSS" href="https://kirovj.github.io/atom.xml">
+
+    <style>html,body{background:#fffaf7;color:#2d2d2d;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"}a,a:visited{color:darkred;text-decoration:none}a:hover{text-decoration:underline}main{margin:auto;max-width:38rem;padding:.8rem}pre{background:#fff;overflow:scroll;padding:1rem}td{border:1px solid #2d2d2d;padding:10px}img{height:auto;max-width:100%}.homepage-list{list-style:none;padding:1rem 0}.homepage-list li{align-items:center;display:flex;flex-wrap:wrap;justify-content:space-between;margin-bottom:10px}@media (max-width: 38rem){.homepage-list li a{width:100%}}</style>
+
+    <meta property="og:site_name" content="Kirovj&#x27;s Chaos">
+      <meta name="author" content="Kirovj" />
+      <meta property="og:title" content="h2 database read only">
+      <meta property="og:description" content="">
+      <meta property="og:url" content="https://kirovj.github.io/002-h2-database-read-only/">
+      <meta property="og:image" content="">
+
+      <meta property="og:type" content="article" />
+        <meta property="article:published_time" content="2021-03-20T00:00:00+00:00" />
+
+      
+      
+    
+
+  </head>
+  
+
+  <body>
+    <main id="main" role="main">
+
+      
+      <header role="banner">
+        <h3 style="margin-top:0;">
+          <a href="https://kirovj.github.io" title="Home">Kirovj&#x27;s Chaos</a>
+          <br /><small></small>
+        </h3>
+      </header>
+      <hr />
+      
+
+      
+<article>
+  <h1>h2 database read only</h1>
+
+  
+    <p style="font-size:90%;">Posted on <time datetime="2021-03-20T00:00:00+00:00">March 20, 2021</time></p>
+  
+
+  <h2 id="h2-shu-ju-ku-wen-jian-quan-xian-wen-ti-dao-zhi-wu-fa-xie-ru">h2 数据库 文件权限问题导致无法写入</h2>
+<blockquote>
+<p>Causedby: org.h2.jdbc.JdbcSQLNonTransientException:The database is read only; SQL statement: UPDATE PUBLIC.DATABASECHANGELOGLOCK SET LOCKED = TRUE, LOCKEDBY =‘10.16.0.5 (10.16.0.5)’, LOCKGRANTED =‘2020-06-17 15:07:20.707’ WHERE ID =1 AND LOCKED = FALSE [90097-200] at org.h2.message.DbException.getJdbcSQLException(DbException.java:505) at org.h2.message.DbException.getJdbcSQLException(DbException.java:429) at org.h2.message.DbException.get(DbException.java:205)</p>
+</blockquote>
+<h3 id="emdbeddedmo-shi-xia-javafang-wen-h2shu-ju-ku-wen-jian-xu-yao-huo-qu-quan-xian">emdbedded模式下java访问h2数据库文件需要获取权限</h3>
+
+</article>
+
+
+      
+      <footer role="contentinfo">
+        <hr />
+        
+        <nav style="margin-bottom:1rem;" role="navigation">
+          
+            <a href="https://kirovj.github.io/about">About</a>
+            
+              <span>&middot;</span>
+            
+          
+            <a href="https://kirovj.github.io/atom.xml">RSS</a>
+            
+              <span>&middot;</span>
+            
+          
+            <a href="https://github.com/kirovj">Github</a>
+            
+          
+        </nav>
+        
+        
+        <small>Built with <a href="https://www.getzola.org/">Zola</a>.<br />
+          Maintained with &hearts; for the web.<br />
+          
+        </small>
+        
+      </footer>
+      
+
+    </main>
+    
+    
+  </body>
+</html>
+

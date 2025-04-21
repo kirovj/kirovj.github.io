@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>记录下写cloud时前后端遇到的一些问题 &middot; Kirovj&#x27;s Chaos</title>
+    <meta name="description" content="" />
+    <link rel="shortcut icon"  href="https://kirovj.github.io/favicon.ico" />
+    <link rel="alternate" type="application/atom+xml" title="RSS" href="https://kirovj.github.io/atom.xml">
+
+    <style>html,body{background:#fffaf7;color:#2d2d2d;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"}a,a:visited{color:darkred;text-decoration:none}a:hover{text-decoration:underline}main{margin:auto;max-width:38rem;padding:.8rem}pre{background:#fff;overflow:scroll;padding:1rem}td{border:1px solid #2d2d2d;padding:10px}img{height:auto;max-width:100%}.homepage-list{list-style:none;padding:1rem 0}.homepage-list li{align-items:center;display:flex;flex-wrap:wrap;justify-content:space-between;margin-bottom:10px}@media (max-width: 38rem){.homepage-list li a{width:100%}}</style>
+
+    <meta property="og:site_name" content="Kirovj&#x27;s Chaos">
+      <meta name="author" content="Kirovj" />
+      <meta property="og:title" content="记录下写cloud时前后端遇到的一些问题">
+      <meta property="og:description" content="">
+      <meta property="og:url" content="https://kirovj.github.io/003-ji-lu-xia-xie-cloudshi-qian-hou-duan-yu-dao-de-yi-xie-wen-ti/">
+      <meta property="og:image" content="">
+
+      <meta property="og:type" content="article" />
+        <meta property="article:published_time" content="2021-03-31T00:00:00+00:00" />
+
+      
+      
+    
+
+  </head>
+  
+
+  <body>
+    <main id="main" role="main">
+
+      
+      <header role="banner">
+        <h3 style="margin-top:0;">
+          <a href="https://kirovj.github.io" title="Home">Kirovj&#x27;s Chaos</a>
+          <br /><small></small>
+        </h3>
+      </header>
+      <hr />
+      
+
+      
+<article>
+  <h1>记录下写cloud时前后端遇到的一些问题</h1>
+
+  
+    <p style="font-size:90%;">Posted on <time datetime="2021-03-31T00:00:00+00:00">March 31, 2021</time></p>
+  
+
+  <p>之前没怎么接触过前端，遇到了很多问题，记录一下。<a href="https://www.wuyiting.cn/cloud">cloud</a></p>
+<h3 id="vue-ji-element-ui-zai-cdnzhong-ke-zhi-jie-yin-ru-shi-yong"><strong>Vue 及 element-ui 在cdn中可直接引入使用</strong></h3>
+<p>只不过使用上有些区别，遇到问题在搜索时需要注意。之后前端还是尝试使用工程搭建重构一版，现在仍然是不分离的状态。</p>
+<h3 id="axiosde-shi-yong"><strong>axios的使用</strong></h3>
+<pre data-lang="jsx" style="background-color:#2b303b;color:#c0c5ce;" class="language-jsx "><code class="language-jsx" data-lang="jsx"><span>axios.post(&#39;/cloud/api/delete&#39;, {&#39;name&#39;: row.name})
+</span><span>   .then(function (res) {
+</span><span>      if (res.data.statusCode === 0) {
+</span><span>            ELEMENT.Message(&quot;delete success&quot;);
+</span><span>            ft.tableData.splice(index, 1);
+</span><span>      } else {
+</span><span>            ELEMENT.Message.warning(&quot;delete failed, &quot; + res.data.msg);
+</span><span>      }
+</span><span>   })
+</span></code></pre>
+<h3 id="qian-duan-xia-zai-wen-jian"><strong>前端下载文件</strong></h3>
+<p>与请求接口不同，页面上暂时用的js原生 - js原生</p>
+<pre data-lang="jsx" style="background-color:#2b303b;color:#c0c5ce;" class="language-jsx "><code class="language-jsx" data-lang="jsx"><span>window.open(&#39;/cloud/download/&#39; + row.name);
+</span></code></pre>
+<ul>
+<li>axios</li>
+</ul>
+<h3 id="ju-bu-ajaxqing-qiu-yu-hou-duan-lan-jie-tiao-zhuan"><strong>局部ajax请求与后端拦截跳转</strong></h3>
+<p>之前的验证登陆并跳转至login页面是后端实现的：</p>
+<pre data-lang="java" style="background-color:#2b303b;color:#c0c5ce;" class="language-java "><code class="language-java" data-lang="java"><span>response.</span><span style="color:#bf616a;">sendRedirect</span><span>(&quot;</span><span style="color:#a3be8c;">/login</span><span>&quot;);
+</span></code></pre>
+<p>这种方法在ajax请求的时候不会自动跳转至登陆页面，所以要在前端执行跳转。</p>
+<pre data-lang="jsx" style="background-color:#2b303b;color:#c0c5ce;" class="language-jsx "><code class="language-jsx" data-lang="jsx"><span>window.location.href = &quot;/login&quot;;
+</span></code></pre>
+<h3 id="hou-duan-shang-chuan-yu-xia-zai"><strong>后端上传与下载</strong></h3>
+<p>这里就直接贴下源码</p>
+<pre data-lang="java" style="background-color:#2b303b;color:#c0c5ce;" class="language-java "><code class="language-java" data-lang="java"><span>@</span><span style="color:#bf616a;">Allow</span><span>(</span><span style="color:#bf616a;">role </span><span>= &quot;</span><span style="color:#a3be8c;">admin</span><span>&quot;, </span><span style="color:#bf616a;">redirect </span><span>= </span><span style="color:#d08770;">false</span><span>)
+</span><span>@</span><span style="color:#bf616a;">PostMapping</span><span>(&quot;</span><span style="color:#a3be8c;">/upload</span><span>&quot;)
+</span><span style="color:#b48ead;">public </span><span style="color:#ebcb8b;">Res </span><span style="color:#bf616a;">upload</span><span>(@</span><span style="color:#bf616a;">RequestParam</span><span>(&quot;</span><span style="color:#a3be8c;">file</span><span>&quot;) </span><span style="color:#ebcb8b;">MultipartFile</span><span> file) {
+</span><span>   </span><span style="color:#b48ead;">try </span><span>{
+</span><span>      </span><span style="color:#ebcb8b;">CloudFile</span><span> cloudFile = </span><span style="color:#b48ead;">new </span><span style="color:#ebcb8b;">CloudFile</span><span>();
+</span><span>      cloudFile.</span><span style="color:#bf616a;">setName</span><span>(file.</span><span style="color:#bf616a;">getOriginalFilename</span><span>());
+</span><span>      cloudFile.</span><span style="color:#bf616a;">setSize</span><span>(file.</span><span style="color:#bf616a;">getSize</span><span>());
+</span><span>      cloudFile.</span><span style="color:#bf616a;">setIn</span><span>(file.</span><span style="color:#bf616a;">getInputStream</span><span>());
+</span><span>      cloudService.</span><span style="color:#bf616a;">upload</span><span>(cloudFile);
+</span><span>      </span><span style="color:#b48ead;">return </span><span style="color:#ebcb8b;">Res</span><span>.</span><span style="color:#bf616a;">success</span><span>();
+</span><span>   } </span><span style="color:#b48ead;">catch </span><span>(</span><span style="color:#ebcb8b;">Throwable </span><span style="color:#bf616a;">t</span><span>) {
+</span><span>      </span><span style="color:#b48ead;">return </span><span style="color:#ebcb8b;">Res</span><span>.</span><span style="color:#bf616a;">unknown</span><span>(&quot;</span><span style="color:#a3be8c;">/cloud</span><span>&quot;, t.</span><span style="color:#bf616a;">getMessage</span><span>());
+</span><span>   }
+</span><span>}
+</span><span>
+</span><span>@</span><span style="color:#bf616a;">GetMapping</span><span>(&quot;</span><span style="color:#a3be8c;">/download/{filename}</span><span>&quot;)
+</span><span style="color:#b48ead;">public</span><span> void </span><span style="color:#bf616a;">download</span><span>(@</span><span style="color:#ebcb8b;">PathVariable String</span><span> filename, </span><span style="color:#ebcb8b;">HttpServletResponse</span><span> response) {
+</span><span>   </span><span style="color:#ebcb8b;">File</span><span> file = </span><span style="color:#b48ead;">new </span><span style="color:#ebcb8b;">File</span><span>(path + </span><span style="color:#ebcb8b;">File</span><span>.separator + filename);
+</span><span>   </span><span style="color:#b48ead;">if </span><span>(file.</span><span style="color:#bf616a;">exists</span><span>()) {
+</span><span>      response.</span><span style="color:#bf616a;">setContentType</span><span>(&quot;</span><span style="color:#a3be8c;">application/octet-stream</span><span>&quot;);
+</span><span>      response.</span><span style="color:#bf616a;">setHeader</span><span>(&quot;</span><span style="color:#a3be8c;">Content-Disposition</span><span>&quot;,
+</span><span>               &quot;</span><span style="color:#a3be8c;">attachment; filename=</span><span>&quot; + </span><span style="color:#ebcb8b;">URLEncoder</span><span>.</span><span style="color:#bf616a;">encode</span><span>(filename, </span><span style="color:#ebcb8b;">StandardCharsets</span><span>.</span><span style="color:#d08770;">UTF_8</span><span>));
+</span><span>      </span><span style="color:#b48ead;">try </span><span>(</span><span style="color:#ebcb8b;">BufferedOutputStream</span><span> out = </span><span style="color:#b48ead;">new </span><span style="color:#ebcb8b;">BufferedOutputStream</span><span>(response.</span><span style="color:#bf616a;">getOutputStream</span><span>());
+</span><span>            </span><span style="color:#ebcb8b;">BufferedInputStream</span><span> in = </span><span style="color:#b48ead;">new </span><span style="color:#ebcb8b;">BufferedInputStream</span><span>(</span><span style="color:#b48ead;">new </span><span style="color:#ebcb8b;">FileInputStream</span><span>(file))) {
+</span><span>
+</span><span>            </span><span style="color:#b48ead;">byte[]</span><span> b = </span><span style="color:#b48ead;">new byte</span><span>[</span><span style="color:#d08770;">1024</span><span>];
+</span><span>            </span><span style="color:#b48ead;">int</span><span> len;
+</span><span>            </span><span style="color:#b48ead;">while </span><span>((len = in.</span><span style="color:#bf616a;">read</span><span>(b)) != -</span><span style="color:#d08770;">1</span><span>) {
+</span><span>               out.</span><span style="color:#bf616a;">write</span><span>(b, </span><span style="color:#d08770;">0</span><span>, len);
+</span><span>            }
+</span><span>      } </span><span style="color:#b48ead;">catch </span><span>(</span><span style="color:#ebcb8b;">IOException </span><span style="color:#bf616a;">e</span><span>) {
+</span><span>            log.</span><span style="color:#bf616a;">warn</span><span>(&quot;</span><span style="color:#a3be8c;">download error!</span><span>&quot;);
+</span><span>      }
+</span><span>   }
+</span><span>}
+</span></code></pre>
+<blockquote>
+<p>下载文件还有其他更方便的实现，比如ResponseEntity等</p>
+</blockquote>
+
+</article>
+
+
+      
+      <footer role="contentinfo">
+        <hr />
+        
+        <nav style="margin-bottom:1rem;" role="navigation">
+          
+            <a href="https://kirovj.github.io/about">About</a>
+            
+              <span>&middot;</span>
+            
+          
+            <a href="https://kirovj.github.io/atom.xml">RSS</a>
+            
+              <span>&middot;</span>
+            
+          
+            <a href="https://github.com/kirovj">Github</a>
+            
+          
+        </nav>
+        
+        
+        <small>Built with <a href="https://www.getzola.org/">Zola</a>.<br />
+          Maintained with &hearts; for the web.<br />
+          
+        </small>
+        
+      </footer>
+      
+
+    </main>
+    
+    
+  </body>
+</html>
+
